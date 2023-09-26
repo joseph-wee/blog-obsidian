@@ -1,5 +1,5 @@
 import React from "react";
-import Parse from "@/components/Parse";
+
 import rehypeDocument from "rehype-document";
 import rehypeFormat from "rehype-format";
 import rehypeStringify from "rehype-stringify";
@@ -16,45 +16,30 @@ import wikiLinkPlugin from "remark-wiki-link-plus";
 import Link from "next/link.js";
 import externalLinks from "remark-external-links";
 import highlight from "remark-highlight.js";
+import {
+  getDirectoryTree,
+  getPath,
+  getSlugList,
+  mdToHtml,
+  nodeTest,
+} from "@/lib/api";
+
+/** pre-render */
+export function generateStaticParams() {
+  const slugList = getSlugList();
+  return slugList;
+}
 
 const page = async ({ params }) => {
-  let directoryList = fs.readdirSync("memo");
-  let fileList = [];
+  const path = getPath(params);
+  const htmlContent = mdToHtml(path);
 
-  directoryList.forEach((el) => {
-    if (el == ".obsidian") {
-      return;
-    }
-    if (el.split(".")[1] == "md") {
-      return;
-    }
-    let temp = fs.readdirSync(`memo/${el}`);
-    console.log(`memo/${el}`);
-    fileList.push(temp);
-  });
-
-  console.log(fileList);
-
-  let path = decodeURI(params.slug);
-
-  const test = fs.readFileSync(`memo/Javascript/${path}.md`, "utf8");
-
-  const file = await unified()
-    .use(markdown, { gfm: true }) // Parse Markdown
-    .use(wikiLinkPlugin, {
-      hrefTemplate: (permalink) => `/post/${permalink}`,
-    })
-    .use(remark2rehype)
-    .use(rehypeReact, {
-      createElement: React.createElement, // Use React.createElement for rendering
-    });
-
-  const htmlContent = file.processSync(test).result;
+  nodeTest(path);
 
   return (
     <div>
-      {/* <Link href="/blog/test">test</Link> */}
       {htmlContent}
+      <Link href="Test">test</Link>
     </div>
   );
 };
